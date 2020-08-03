@@ -18,6 +18,7 @@
  */
 package VASSAL.build.widget;
 
+import VASSAL.counters.PieceWrapper;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -81,7 +82,7 @@ public class PieceSlot extends Widget implements MouseListener, KeyListener {
   protected GamePiece expanded;
   protected String name;
   protected String pieceDefinition;
-  protected static Font FONT = new Font("Dialog", 0, 12);
+  protected static Font FONT = new Font("Dialog", Font.PLAIN, 12);
   protected JPanel panel;
   protected int width, height;
   protected String gpId = ""; // Unique PieceSlot Id
@@ -175,7 +176,7 @@ public class PieceSlot extends Widget implements MouseListener, KeyListener {
     if (expanded == null) {
       final GamePiece p = getPiece();
       if (p != null) {  // Possible when PlaceMarker is building
-        expanded = PieceCloner.getInstance().clonePiece(p);
+        expanded = PieceCloner.getInstance().cloneAPiece(p);
       }
     }
     return expanded;
@@ -211,7 +212,7 @@ public class PieceSlot extends Widget implements MouseListener, KeyListener {
       c.setProperty(Properties.PIECE_ID, getGpId());
     }
 
-    return c;
+    return new PieceWrapper(c);
   }
 
   public void paint(Graphics g) {
@@ -282,7 +283,7 @@ public class PieceSlot extends Widget implements MouseListener, KeyListener {
     if (getPiece() != null) {
       KeyBuffer.getBuffer().clear();
       DragBuffer.getBuffer().clear();
-      GamePiece newPiece = PieceCloner.getInstance().clonePiece(getPiece());
+      GamePiece newPiece = PieceCloner.getInstance().cloneAPiece(getPiece());
       newPiece.setProperty(Properties.PIECE_ID, getGpId());
       DragBuffer.getBuffer().add(newPiece);
     }
@@ -432,13 +433,10 @@ public class PieceSlot extends Widget implements MouseListener, KeyListener {
     
     panel.setDropTarget(AbstractDragHandler.makeDropTarget(panel, DnDConstants.ACTION_MOVE, null));
 
-    DragGestureListener dragGestureListener = new DragGestureListener() {
-      @Override
-      public void dragGestureRecognized(DragGestureEvent dge) {
-        if (SwingUtils.isDragTrigger(dge)) {
-          startDrag();
-          AbstractDragHandler.getTheDragHandler().dragGestureRecognized(dge);
-        }
+    DragGestureListener dragGestureListener = dge -> {
+      if (SwingUtils.isDragTrigger(dge)) {
+        startDrag();
+        AbstractDragHandler.getTheDragHandler().dragGestureRecognized(dge);
       }
     };
 

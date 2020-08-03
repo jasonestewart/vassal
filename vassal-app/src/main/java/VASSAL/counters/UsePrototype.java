@@ -133,7 +133,7 @@ public class UsePrototype extends Decorator implements EditablePiece, Loopable {
         lastCachedPrototype = type;
         try {
           RecursionLimiter.startExecution(this);
-
+          // NOTE: Calling clonePiece NOT cloneAPiece as we do not want a PieceWrapper added
           prototype = PieceCloner.getInstance().clonePiece(expandedPrototype);
           final Decorator outer = (Decorator)
             Decorator.getInnermost(prototype).getProperty(Properties.OUTER);

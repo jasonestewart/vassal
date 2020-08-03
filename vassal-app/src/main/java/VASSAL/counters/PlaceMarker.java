@@ -257,11 +257,11 @@ public class PlaceMarker extends Decorator implements TranslatablePiece {
   public GamePiece createMarker() {
     GamePiece piece = createBaseMarker();
     if (piece == null) {
-      piece = new BasicPiece();
+      piece = new PieceWrapper(new BasicPiece());
       newGpId = getGpId();
     }
     else {
-      piece = PieceCloner.getInstance().clonePiece(piece);
+      piece = PieceCloner.getInstance().cloneAPiece(piece);
     }
     piece.setProperty(Properties.PIECE_ID, newGpId);
     return piece;

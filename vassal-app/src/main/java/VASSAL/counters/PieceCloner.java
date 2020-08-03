@@ -27,7 +27,7 @@ import VASSAL.tools.ReflectionUtils;
  * Utility class for cloning {@link GamePiece}s
  */
 public class PieceCloner {
-  private static PieceCloner instance = new PieceCloner();
+  private static final PieceCloner instance = new PieceCloner();
 
   // For use by subclasses
   protected PieceCloner() {}
@@ -36,6 +36,16 @@ public class PieceCloner {
     return instance;
   }
 
+  /**
+   * Create a new instance that is a clone of the given piece.
+   * Add a PieceWrapper as the top trait if it does not already have one
+   *
+   * @return the new instance
+   */
+  public GamePiece cloneAPiece(GamePiece piece) {
+    GamePiece clone = clonePiece(piece);
+    return clone instanceof PieceWrapper ? clone : new PieceWrapper(clone);
+  }
   /**
    * Create a new instance that is a clone of the given piece.
    *

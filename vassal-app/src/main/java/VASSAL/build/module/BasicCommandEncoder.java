@@ -58,6 +58,7 @@ import VASSAL.counters.MenuSeparator;
 import VASSAL.counters.MovementMarkable;
 import VASSAL.counters.NonRectangular;
 import VASSAL.counters.Obscurable;
+import VASSAL.counters.PieceWrapper;
 import VASSAL.counters.Pivot;
 import VASSAL.counters.PlaceMarker;
 import VASSAL.counters.PlaySound;
@@ -107,6 +108,7 @@ public class BasicCommandEncoder implements CommandEncoder, Buildable {
   private final BasicPieceFactory defaultBasicPieceFactory = type -> null;
 
   private final Map<String, DecoratorFactory> decoratorFactories = Map.ofEntries(
+    Map.entry(PieceWrapper.ID, PieceWrapper::new),
     Map.entry(Immobilized.ID, Immobilized::new),
     Map.entry(Embellishment.ID, (type, inner) -> {
       final Embellishment e = new Embellishment(type, inner);

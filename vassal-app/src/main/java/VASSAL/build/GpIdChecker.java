@@ -349,7 +349,7 @@ public class GpIdChecker {
       GamePiece newPiece = (slot != null) ? slot.getPiece() : marker.createMarker();
       // The following two steps create a complete new GamePiece with all
       // prototypes expanded
-      newPiece = PieceCloner.getInstance().clonePiece(newPiece);
+      newPiece = PieceCloner.getInstance().cloneAPiece(newPiece);
       copyState(oldPiece, newPiece);
       newPiece.setProperty(Properties.PIECE_ID, getGpId());
       return newPiece;

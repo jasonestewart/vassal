@@ -117,7 +117,7 @@ public class SavedGameUpdater {
 
       // Resolve prototypes
       final GamePiece clone =
-        PieceCloner.getInstance().clonePiece(slot.getPiece());
+        PieceCloner.getInstance().cloneAPiece(slot.getPiece());
 
       p.setProperty(clone.getType(),
         ComponentPathBuilder.getInstance().getId(
@@ -145,7 +145,7 @@ public class SavedGameUpdater {
 
     @Override
     public GamePiece createMarker() {
-      GamePiece marker = PieceCloner.getInstance().clonePiece(replacement);
+      GamePiece marker = PieceCloner.getInstance().cloneAPiece(replacement);
       if (matchRotation) {
         matchTraits(getInner(), marker);
       }
