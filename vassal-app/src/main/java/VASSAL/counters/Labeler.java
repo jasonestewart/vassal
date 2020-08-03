@@ -156,6 +156,19 @@ public class Labeler extends Decorator implements TranslatablePiece, Loopable {
     return s.replace("$"+BAD_PIECE_NAME+"$", "$"+PIECE_NAME+"$");
   }
 
+  private final java.util.Map<Object, PropertyGetter> localGetters = java.util.Map.ofEntries(
+    java.util.Map.entry(
+      propertyName,
+      k -> getLabel()
+    ),
+    java.util.Map.entry(
+      Properties.VISIBLE_STATE,
+      k -> getLabel() + piece.getProperty(Properties.VISIBLE_STATE)
+    )
+  );
+
+  private final PropertyGetter defaultGetter = k -> super.getProperty(k);
+
   @Override
   public Object getLocalizedProperty(Object key) {
     if (key.equals(propertyName)) {
@@ -171,15 +184,7 @@ public class Labeler extends Decorator implements TranslatablePiece, Loopable {
 
   @Override
   public Object getProperty(Object key) {
-    if (key.equals(propertyName)) {
-      return getLabel();
-    }
-    else if (Properties.VISIBLE_STATE.equals(key)) {
-      return getLabel()+piece.getProperty(key);
-    }
-    else {
-      return super.getProperty(key);
-    }
+    return localGetters.getOrDefault(key, defaultGetter).get(key);
   }
 
   @Override

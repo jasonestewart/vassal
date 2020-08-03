@@ -33,15 +33,13 @@ public class PieceWrapper extends Decorator {
 
   public static final String ID = "pieceWrapper;";
 
-  public PieceWrapper() {
-    this(null);
-  }
-
   public PieceWrapper(GamePiece p) {
+    System.out.println("PieceWrapper(GamePiece)");
     setInner(p);
   }
 
   public PieceWrapper(String type, GamePiece p) {
+    System.out.println("PieceWrapper(String, GamePiece)");
     setInner(p);
   }
 

@@ -765,6 +765,48 @@ public class Embellishment extends Decorator implements TranslatablePiece {
     }
   }
 
+ private final java.util.Map<Object, PropertyGetter> localGetters = java.util.Map.ofEntries(
+    java.util.Map.entry(
+      name + IMAGE,
+      k -> {
+        checkPropertyLevel();
+        return value > 0 ? imageName[Math.abs(value) - 1] : "";
+      }
+    ),
+    java.util.Map.entry(
+      name + NAME,
+      k -> {
+        checkPropertyLevel();
+        return value > 0 ? strip(commonName[Math.abs(value) - 1]) : "";
+      }
+    ),
+    java.util.Map.entry(
+      name + LEVEL,
+      k -> {
+        checkPropertyLevel();
+        return String.valueOf(value);
+      }
+    ),
+    java.util.Map.entry(
+      name + ACTIVE,
+      k -> String.valueOf(isActive())
+    ),
+    java.util.Map.entry(
+      Properties.VISIBLE_STATE,
+      k -> {
+        checkPropertyLevel();
+        String s = String.valueOf(super.getProperty(key));
+        s += value;
+        if (drawUnderneathWhenSelected) {
+          s += getProperty(Properties.SELECTED);
+        }
+        return s;
+      }
+    )
+  );
+
+  private final PropertyGetter defaultGetter = k -> super.getProperty(k);
+
   @Override
   public Object getProperty(Object key) {
     if (key.equals(name + IMAGE)) {

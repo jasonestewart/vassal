@@ -92,26 +92,34 @@ public abstract class Decorator implements GamePiece, StateMergeable, PropertyNa
     return piece.getParent();
   }
 
+  private final java.util.Map<Object, PropertyGetter> localGetters = java.util.Map.ofEntries(
+    java.util.Map.entry(
+      Properties.KEY_COMMANDS,
+      k -> getKeyCommands()
+    ),
+    java.util.Map.entry(
+      Properties.INNER,
+      k -> piece
+    ),
+    java.util.Map.entry(
+      Properties.OUTER,
+      k -> dec
+    ),
+    java.util.Map.entry(
+      Properties.VISIBLE_STATE,
+      k -> myGetState() + piece.getProperty(k)
+    ),
+    java.util.Map.entry(
+      Properties.SELECTED,
+      k -> selected
+    )
+  );
+
+  private final PropertyGetter defaultGetter = k -> piece.getProperty(k);
+
   @Override
   public Object getProperty(Object key) {
-    if (Properties.KEY_COMMANDS.equals(key)) {
-      return getKeyCommands();
-    }
-    else if (Properties.INNER.equals(key)) {
-      return piece;
-    }
-    else if (Properties.OUTER.equals(key)) {
-      return dec;
-    }
-    else if (Properties.VISIBLE_STATE.equals(key)) {
-      return myGetState()+piece.getProperty(key);
-    }
-    else if (Properties.SELECTED.equals(key)) {
-      return selected;
-    }
-    else {
-      return piece.getProperty(key);
-    }
+    return localGetters.getOrDefault(key, defaultGetter).get(key);
   }
 
   @Override

@@ -140,12 +140,18 @@ public class DynamicProperty extends Decorator implements TranslatablePiece, Pro
     return piece.getShape();
   }
 
+  private final java.util.Map<Object, PropertyGetter> localGetters = java.util.Map.ofEntries(
+    java.util.Map.entry(
+      getKey(),
+      k -> getValue()
+    )
+  );
+
+  private final PropertyGetter defaultGetter = k -> super.getProperty(k);
+
   @Override
   public Object getProperty(Object key) {
-    if (key.equals(getKey())) {
-      return getValue();
-    }
-    return super.getProperty(key);
+    return localGetters.getOrDefault(key, defaultGetter).get(key);
   }
 
   @Override

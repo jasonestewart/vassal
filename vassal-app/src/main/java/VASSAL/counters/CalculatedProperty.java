@@ -139,19 +139,11 @@ public class CalculatedProperty extends Decorator implements EditablePiece, Loop
     return expression.getExpression();
   }
 
-  /**
-   * Return the value of this trait's property.
-   * Evaluating Expressions can lead to infinite loops and
-   * eventually a Stack Overflow. Trap and report this
-   */
-  @Override
-  public Object getProperty(Object key) {
-    Object result = "";
-    if (name.length() > 0 && name.equals(key)) {
+  private String execute() {
+    if (name.length() > 0) {
       try {
         RecursionLimiter.startExecution(this);
-        result = evaluate();
-        return result;
+        return evaluate();
       }
       catch (RecursionLimitException e) {
         RecursionLimiter.infiniteLoop(e);
@@ -159,10 +151,27 @@ public class CalculatedProperty extends Decorator implements EditablePiece, Loop
       finally {
         RecursionLimiter.endExecution();
       }
-
-      return result;
     }
-    return super.getProperty(key);
+    return "";
+  }
+
+  private final java.util.Map<Object, PropertyGetter> localGetters = java.util.Map.ofEntries(
+    java.util.Map.entry(
+      name,
+      k -> execute() 
+    )
+  );
+
+  private final PropertyGetter defaultGetter = k -> super.getProperty(k);
+
+  /**
+   * Return the value of this trait's property.
+   * Evaluating Expressions can lead to infinite loops and
+   * eventually a Stack Overflow. Trap and report this
+   */
+  @Override
+  public Object getProperty(Object key) {
+    return localGetters.getOrDefault(key, defaultGetter).get(key);
   }
 
   @Override
