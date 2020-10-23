@@ -21,6 +21,8 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Objects;
@@ -34,6 +36,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
+import VASSAL.build.module.documentation.HelpFile;
+import VASSAL.counters.*;
+import VASSAL.tools.BrowserSupport;
 import VASSAL.build.IllegalBuildException;
 import net.miginfocom.swing.MigLayout;
 
@@ -49,11 +54,6 @@ import VASSAL.command.ChangePiece;
 import VASSAL.command.Command;
 import VASSAL.command.NullCommand;
 import VASSAL.command.RemovePiece;
-import VASSAL.counters.Deck;
-import VASSAL.counters.Decorator;
-import VASSAL.counters.GamePiece;
-import VASSAL.counters.Properties;
-import VASSAL.counters.Stack;
 import VASSAL.i18n.Resources;
 import VASSAL.tools.ErrorDialog;
 
@@ -76,6 +76,7 @@ public final class GameRefresher implements GameComponent {
   protected int notOwnedCount;
   protected RefreshDialog dialog;
   protected boolean testMode;
+  protected boolean useLabelerName;
 
   public GameRefresher(GpIdSupport gpIdSupport) {
     this.gpIdSupport = gpIdSupport;
@@ -108,6 +109,7 @@ public final class GameRefresher implements GameComponent {
     dialog = null;
   }
 
+  public void execute(boolean testMode, boolean useName, boolean useLabelerName) {
   /**
    * This method is used by PredefinedSetup.refresh() to update a PredefinedSetup in a GameModule
    * The default exectute() method calls: GameModule.getGameModule().getGameState().getAllPieces()
@@ -212,6 +214,7 @@ public final class GameRefresher implements GameComponent {
 
   public void execute(boolean testMode, boolean useName) {
     this.testMode = testMode;
+    this.useLabelerName = useLabelerName;
 
     final GameModule theModule = GameModule.getGameModule();
     updatedCount = 0;
@@ -221,7 +224,7 @@ public final class GameRefresher implements GameComponent {
      * 1. Use the GpIdChecker to build a cross-reference of all available
      * PieceSlots and PlaceMarker's in the module.
      */
-    gpIdChecker = new GpIdChecker(useName);
+    gpIdChecker = new GpIdChecker(useName,useLabelerName);
     for (PieceSlot slot : theModule.getAllDescendantComponentsOf(PieceSlot.class)) {
       gpIdChecker.add(slot);
     }
@@ -256,7 +259,7 @@ public final class GameRefresher implements GameComponent {
         for (Iterator<GamePiece> i = ((Stack) piece).getPiecesInVisibleOrderIterator(); i.hasNext();) {
           final GamePiece p = i.next();
           if (!Boolean.TRUE.equals(p.getProperty(Properties.INVISIBLE_TO_ME))
-              && !Boolean.TRUE.equals(p.getProperty(Properties.OBSCURED_TO_ME))) {
+            && !Boolean.TRUE.equals(p.getProperty(Properties.OBSCURED_TO_ME))) {
             pieces.add(0, p);
           }
           else {
@@ -266,7 +269,7 @@ public final class GameRefresher implements GameComponent {
       }
       else if (piece.getParent() == null) {
         if (!Boolean.TRUE.equals(piece.getProperty(Properties.INVISIBLE_TO_ME))
-            && !Boolean.TRUE.equals(piece.getProperty(Properties.OBSCURED_TO_ME))) {
+          && !Boolean.TRUE.equals(piece.getProperty(Properties.OBSCURED_TO_ME))) {
           pieces.add(0, piece);
         }
         else {
@@ -406,6 +409,7 @@ public final class GameRefresher implements GameComponent {
     private final GameRefresher refresher;
     private JTextArea results;
     private JCheckBox nameCheck;
+    private JCheckBox labelerNameCheck;
 
     RefreshDialog(GameRefresher refresher) {
       this.refresher = refresher;
@@ -435,9 +439,13 @@ public final class GameRefresher implements GameComponent {
       final JButton exitButton = new JButton(Resources.getString("General.exit"));
       exitButton.addActionListener(e -> exit());
 
+      final JButton helpButton = new JButton(Resources.getString("General.help"));
+      helpButton.addActionListener(e -> help());
+
       buttonPanel.add(testButton);
       buttonPanel.add(runButton);
       buttonPanel.add(exitButton);
+      buttonPanel.add(helpButton);
 
       add(buttonPanel);
 
@@ -447,6 +455,8 @@ public final class GameRefresher implements GameComponent {
 
       nameCheck = new JCheckBox(Resources.getString("GameRefresher.use_basic_name"));
       add(nameCheck);
+      labelerNameCheck = new JCheckBox(Resources.getString("GameRefresher.use_labeler_descr"));
+      add(labelerNameCheck);
 
       pack();
     }
@@ -457,13 +467,27 @@ public final class GameRefresher implements GameComponent {
 
     protected void test() {
       results.setText(Resources.getString("GameRefresher.refresh_counters_test"));
-      refresher.execute(true, nameCheck.isSelected());
+      refresher.execute(true, nameCheck.isSelected(), labelerNameCheck.isSelected());
     }
 
     protected void run() {
       results.setText("");
-      refresher.execute(false, nameCheck.isSelected());
+      refresher.execute(false, nameCheck.isSelected(), labelerNameCheck.isSelected());
       exit();
+    }
+
+    protected void help() {
+      File dir = VASSAL.build.module.Documentation.getDocumentationBaseDir();
+      dir = new File(dir, "ReferenceManual"); //$NON-NLS-1$
+      File theFile = new File(dir, "HelpMenu.html"); //$NON-NLS-1$
+      HelpFile h = null;
+      try {
+        h = new HelpFile(null, theFile, "#HelpFile"); //$NON-NLS-1$
+      }
+      catch (MalformedURLException e) {
+        ErrorDialog.bug(e);
+      }
+      BrowserSupport.openURL(h.getContents().toString());
     }
 
     public void addMessage(String mess) {
