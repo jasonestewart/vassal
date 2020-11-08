@@ -53,7 +53,7 @@ public class RefreshPredefinedSetupsDialog extends JDialog {
     Box buttonsBox = Box.createHorizontalBox();
     refreshButton = new JButton(Resources.getString("Editor.RefreshPredefinedSetupsDialog.refresh_predefined"));
     refreshButton.addActionListener(e -> refreshPredefinedSetups());
-    refreshButton.setEnabled(false);
+    refreshButton.setEnabled(true);
     buttonsBox.add(refreshButton);
     JButton helpButton = new JButton(Resources.getString("Editor.SavedGameUpdaterDialog.help"));
 
