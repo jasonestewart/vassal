@@ -36,6 +36,8 @@ import java.awt.HeadlessException;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RefreshPredefinedSetupsDialog extends JDialog {
   private static final long serialVersionUID = 1L;
@@ -81,12 +83,15 @@ public class RefreshPredefinedSetupsDialog extends JDialog {
     refreshButton.setEnabled(false);
 
     final GameModule mod = GameModule.getGameModule();
+    List<PredefinedSetup> pdsList = new ArrayList<>();
     for (PredefinedSetup pds : mod.getAllDescendantComponentsOf(PredefinedSetup.class)) {
-      try {
-        pds.refresh();
-      }
-      catch (final IOException e) {
-        // FIXME: review error message
+      if (!pds.isMenu()) {
+        try {
+          pds.refresh();
+        }
+        catch (final IOException e) {
+          // FIXME: review error message
+        }
       }
     }
     refreshButton.setEnabled(true);
