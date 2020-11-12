@@ -261,21 +261,30 @@ public class PredefinedSetup extends AbstractConfigurable implements GameCompone
     final GameRefresher gameRefresher = new GameRefresher(mod);
 
     Runnable refresh = () -> gameRefresher.execute(false, true);
-    try {
-      gs.setup(false, true);
-      gs.loadGameInBackground(fileName, getSavedGameContents());
+    gs.setup(true, true);
+    gs.loadGameInBackground(fileName, getSavedGameContents());
 
-      SwingUtilities.invokeAndWait(refresh);
-      File tmp = File.createTempFile("vassal", null);
-      gs.saveGame(tmp);
-      gs.updateDone();
+    Thread t = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          SwingUtilities.invokeAndWait(refresh);
+        }
+        catch (InterruptedException | InvocationTargetException e) {
+          ErrorDialog.bug(e); //$NON-NLS-1$
+        }
 
-      ArchiveWriter aw = mod.getArchiveWriter();
-      aw.addFile(tmp.getPath(), fileName);
-    }
-    // FIXME: review error message
-    catch (InterruptedException | InvocationTargetException e1) {
-    }
+      }
+
+    });
+    t.start();
+
+    File tmp = File.createTempFile("vassal", null);
+    gs.saveGame(tmp);
+    gs.updateDone();
+
+    ArchiveWriter aw = mod.getArchiveWriter();
+    aw.addFile(tmp.getPath(), fileName);
   }
 
 
