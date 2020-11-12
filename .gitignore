@@ -1,5 +1,5 @@
 .*.swp
-*.bck
+*.bak
 
 # packaging
 dist/dmg/
