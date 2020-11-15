@@ -23,6 +23,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Objects;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -33,6 +34,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
+import VASSAL.build.IllegalBuildException;
 import net.miginfocom.swing.MigLayout;
 
 import org.slf4j.Logger;
@@ -104,6 +106,85 @@ public final class GameRefresher implements GameComponent {
     dialog = new RefreshDialog(this);
     dialog.setVisible(true);
     dialog = null;
+  }
+
+  /**
+   * This method is used by PredefinedSetup.refresh() to update a PredefinedSetup in a GameModule
+   * The default exectute() method calls: GameModule.getGameModule().getGameState().getAllPieces()
+   * to set the pieces list, this method provides an alternative way to specify which pieces should be refreshed.
+   * @param useName - tell the gpIdChecker to use the piece name
+   * @param pieces - list of pieces to be refreshed, if null defaults to all pieces
+   * @throws IllegalBuildException - if we get a gpIdChecker error
+   */
+  public void executeHeadless(boolean useName, ArrayList<GamePiece> pieces) throws IllegalBuildException {
+    final GameModule theModule = GameModule.getGameModule();
+    /*
+     * 1. Use the GpIdChecker to build a cross-reference of all available
+     * PieceSlots and PlaceMarker's in the module.
+     */
+    gpIdChecker = new GpIdChecker(useName);
+    for (PieceSlot slot : theModule.getAllDescendantComponentsOf(PieceSlot.class)) {
+      gpIdChecker.add(slot);
+    }
+
+    // Add any PieceSlots in Prototype Definitions
+    for (PrototypesContainer pc : theModule.getComponentsOf(PrototypesContainer.class)) {
+      pc.getDefinitions().forEach(gpIdChecker::add);
+    }
+
+    if (gpIdChecker.hasErrors()) {
+      // Any errors should have been resolved by the GpId check at startup, so
+      // this error indicates
+      // a bug in GpIdChecker.fixErrors().
+      gpIdChecker = null;
+      throw new IllegalBuildException("GameRefresher.executeHeadless: gpIdChecker has errors");
+    }
+
+    /*
+     * 2. If we haven't been given a list of pieces, we use the default
+     */
+    if (Objects.isNull(pieces)) {
+      pieces = new ArrayList<>();
+
+      for (GamePiece piece : theModule.getGameState().getAllPieces()) {
+        if (piece instanceof Deck) {
+          for (Iterator<GamePiece> i = ((Stack) piece).getPiecesInVisibleOrderIterator(); i.hasNext();) {
+            pieces.add(0, i.next());
+          }
+        }
+        else if (piece instanceof Stack) {
+          for (Iterator<GamePiece> i = ((Stack) piece).getPiecesInVisibleOrderIterator(); i.hasNext();) {
+            final GamePiece p = i.next();
+            if (!Boolean.TRUE.equals(p.getProperty(Properties.INVISIBLE_TO_ME))
+                && !Boolean.TRUE.equals(p.getProperty(Properties.OBSCURED_TO_ME))) {
+              pieces.add(0, p);
+            }
+            else {
+              notOwnedCount++;
+            }
+          }
+        }
+        else if (piece.getParent() == null) {
+          if (!Boolean.TRUE.equals(piece.getProperty(Properties.INVISIBLE_TO_ME))
+              && !Boolean.TRUE.equals(piece.getProperty(Properties.OBSCURED_TO_ME))) {
+            pieces.add(0, piece);
+          }
+          else {
+            notOwnedCount++;
+          }
+        }
+      }
+    }
+
+    /*
+     * 3. Generate the commands to update the pieces
+     */
+    final Command command = new NullCommand();
+    for (GamePiece piece : pieces) {
+      processGamePiece(piece, command);
+    }
+    logger.info("Refreshed pieces: " + updatedCount + ", Not found: " + notFoundCount); //NON-NLS
+    gpIdChecker = null;
   }
 
   public void execute(boolean testMode, boolean useName) {

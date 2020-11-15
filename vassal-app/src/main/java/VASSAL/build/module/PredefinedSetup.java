@@ -30,6 +30,7 @@ import VASSAL.build.AbstractConfigurable;
 import VASSAL.build.BadDataReport;
 import VASSAL.build.Buildable;
 import VASSAL.build.GameModule;
+import VASSAL.build.IllegalBuildException;
 import VASSAL.build.module.documentation.HelpFile;
 import VASSAL.command.Command;
 import VASSAL.configure.VisibilityCondition;
@@ -255,35 +256,26 @@ public class PredefinedSetup extends AbstractConfigurable implements GameCompone
     return Resources.getString("Editor.PredefinedSetup.component_type"); //$NON-NLS-1$
   }
 
-  public void refresh() throws IOException {
+  public void refresh() throws IOException, IllegalBuildException {
     final GameModule mod = GameModule.getGameModule();
     final GameState gs = mod.getGameState();
     final GameRefresher gameRefresher = new GameRefresher(mod);
 
-    Runnable refresh = () -> gameRefresher.execute(false, true);
+    // get a stream to the saved game in the module file
     gs.setup(true, true);
-    gs.loadGameInBackground(fileName, getSavedGameContents());
+    gs.loadGameInForeground(fileName, getSavedGameContents());
 
-    Thread t = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          SwingUtilities.invokeAndWait(refresh);
-        }
-        catch (InterruptedException | InvocationTargetException e) {
-          ErrorDialog.bug(e); //$NON-NLS-1$
-        }
+    // call the gameRefresher
+    gameRefresher.executeHeadless(true,null);
 
-      }
-
-    });
-    t.start();
-
+    // save the refreshed game into a temporary file
     File tmp = File.createTempFile("vassal", null);
     gs.saveGame(tmp);
     gs.updateDone();
 
+    // write the updated saved game file into the module file
     ArchiveWriter aw = mod.getArchiveWriter();
+    aw.removeFile(fileName);
     aw.addFile(tmp.getPath(), fileName);
   }
 

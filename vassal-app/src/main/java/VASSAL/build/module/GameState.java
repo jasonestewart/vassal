@@ -775,6 +775,13 @@ public class GameState implements CommandEncoder {
     }
   }
 
+  public void loadGameInForeground(final String shortName,
+                                   final InputStream in) throws IOException {
+    Command loadCommand = null;
+    loadCommand = decodeSavedGame(in);
+    loadCommand.execute();
+  }
+
   public void loadGameInBackground(final String shortName,
                                    final InputStream in)  {
     GameModule.getGameModule().warn(
