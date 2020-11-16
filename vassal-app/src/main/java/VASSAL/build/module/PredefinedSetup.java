@@ -256,6 +256,13 @@ public class PredefinedSetup extends AbstractConfigurable implements GameCompone
     final GameState gs = mod.getGameState();
     final GameRefresher gameRefresher = new GameRefresher(mod);
 
+    // since we're going to block the GUI, let's give some feedback
+    final Chatter chatter = mod.getChatter();
+    final Command msg = new Chatter.DisplayText(chatter, "----------"); //NON-NLS
+    msg.append(new Chatter.DisplayText(chatter, "Updating Predefined Setup: " + fileName));  //NON-NLS
+    msg.append(new Chatter.DisplayText(chatter, "----------")); //NON-NLS
+    msg.execute();
+
     // get a stream to the saved game in the module file
     gs.setup(true, true);
     gs.loadGameInForeground(fileName, getSavedGameContents());
