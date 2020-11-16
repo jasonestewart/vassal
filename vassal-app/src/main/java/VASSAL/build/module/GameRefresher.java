@@ -118,6 +118,9 @@ public final class GameRefresher implements GameComponent {
    */
   public void executeHeadless(boolean useName, ArrayList<GamePiece> pieces) throws IllegalBuildException {
     final GameModule theModule = GameModule.getGameModule();
+    updatedCount = 0;
+    notFoundCount = 0;
+    notOwnedCount = 0;
     /*
      * 1. Use the GpIdChecker to build a cross-reference of all available
      * PieceSlots and PlaceMarker's in the module.
@@ -183,6 +186,26 @@ public final class GameRefresher implements GameComponent {
     for (GamePiece piece : pieces) {
       processGamePiece(piece, command);
     }
+    final String player = GlobalOptions.getInstance().getPlayerId();
+    final Chatter chatter = theModule.getChatter();
+    final Command msg = new Chatter.DisplayText(chatter, "----------"); //NON-NLS
+    msg.append(new Chatter.DisplayText(chatter, Resources.getString("GameRefresher.run_refresh_counters", player)));
+    msg.append(new Chatter.DisplayText(chatter, Resources.getString("GameRefresher.counters_refreshed", player, updatedCount)));
+
+    if (notOwnedCount > 0) {
+      msg.append(new Chatter.DisplayText(chatter, Resources.getString("GameRefresher.counters_not_owned", player, notOwnedCount)));
+    }
+
+    if (notFoundCount > 0) {
+      msg.append(new Chatter.DisplayText(chatter, Resources.getString("GameRefresher.counters_not_found", player, notFoundCount)));
+    }
+    msg.append(new Chatter.DisplayText(chatter, "----------")); //NON-NLS
+    msg.execute();
+    command.append(msg);
+
+    // Send the update to other clients
+    theModule.sendAndLog(command);
+
     logger.info("Refreshed pieces: " + updatedCount + ", Not found: " + notFoundCount); //NON-NLS
     gpIdChecker = null;
   }

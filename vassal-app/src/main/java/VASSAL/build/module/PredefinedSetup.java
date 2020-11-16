@@ -17,15 +17,6 @@
  */
 package VASSAL.build.module;
 
-import java.awt.event.ActionEvent;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-
-
 import VASSAL.build.AbstractConfigurable;
 import VASSAL.build.BadDataReport;
 import VASSAL.build.Buildable;
@@ -45,7 +36,11 @@ import VASSAL.tools.menu.ParentProxy;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.SwingUtilities;
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 
 /**
@@ -266,7 +261,7 @@ public class PredefinedSetup extends AbstractConfigurable implements GameCompone
     gs.loadGameInForeground(fileName, getSavedGameContents());
 
     // call the gameRefresher
-    gameRefresher.executeHeadless(true,null);
+    gameRefresher.executeHeadless(true, null);
 
     // save the refreshed game into a temporary file
     File tmp = File.createTempFile("vassal", null);

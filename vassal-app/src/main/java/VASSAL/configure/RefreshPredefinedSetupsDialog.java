@@ -24,15 +24,12 @@ import VASSAL.build.module.documentation.HelpFile;
 import VASSAL.i18n.Resources;
 import VASSAL.tools.ErrorDialog;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.BoxLayout;
-import javax.swing.Box;
-
 import java.awt.Frame;
 import java.awt.HeadlessException;
-
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -90,7 +87,7 @@ public class RefreshPredefinedSetupsDialog extends JDialog {
           pds.refresh();
         }
         catch (final IOException e) {
-          // FIXME: review error message
+          ErrorDialog.bug(e);
         }
       }
     }
