@@ -763,5 +763,17 @@
         <to>VASSAL.configure.StringConfigurer</to>
         <justification>Required for trait config cleanup-subclass extremely unlikely</justification>
     </difference>
+    <difference>
+        <className>VASSAL/build/GpIdChecker</className>
+        <differenceType>7004</differenceType>
+        <method>**</method>
+        <justification>no one should have extended this class</justification>
+    </difference>
+    <difference>
+        <className>VASSAL/build/module/GameRefresher</className>
+        <differenceType>7004</differenceType>
+        <method>**</method>
+        <justification>no one should have extended this class</justification>
+    </difference>
 
 </differences>

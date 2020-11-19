@@ -37,7 +37,15 @@ import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
 import VASSAL.build.module.documentation.HelpFile;
-import VASSAL.counters.*;
+import VASSAL.command.ChangePiece;
+import VASSAL.command.Command;
+import VASSAL.command.NullCommand;
+import VASSAL.command.RemovePiece;
+import VASSAL.counters.Deck;
+import VASSAL.counters.Decorator;
+import VASSAL.counters.GamePiece;
+import VASSAL.counters.Properties;
+import VASSAL.counters.Stack;
 import VASSAL.tools.BrowserSupport;
 import VASSAL.build.IllegalBuildException;
 import net.miginfocom.swing.MigLayout;
@@ -50,12 +58,10 @@ import VASSAL.build.GameModule;
 import VASSAL.build.GpIdChecker;
 import VASSAL.build.GpIdSupport;
 import VASSAL.build.widget.PieceSlot;
-import VASSAL.command.ChangePiece;
-import VASSAL.command.Command;
-import VASSAL.command.NullCommand;
-import VASSAL.command.RemovePiece;
+
 import VASSAL.i18n.Resources;
 import VASSAL.tools.ErrorDialog;
+
 
 /**
  * GameRefresher Replace all counters in the same game with the current version
@@ -121,7 +127,7 @@ public final class GameRefresher implements GameComponent {
      * 1. Use the GpIdChecker to build a cross-reference of all available
      * PieceSlots and PlaceMarker's in the module.
      */
-    gpIdChecker = new GpIdChecker(useName,useLabelerName);
+    gpIdChecker = new GpIdChecker(useName, useLabelerName);
     for (PieceSlot slot : theModule.getAllDescendantComponentsOf(PieceSlot.class)) {
       gpIdChecker.add(slot);
     }
@@ -224,16 +230,16 @@ public final class GameRefresher implements GameComponent {
   }
 
 
-  public void execute(boolean testMode, boolean useName, boolean useLabelerName) {
   /**
    * This method is used by PredefinedSetup.refresh() to update a PredefinedSetup in a GameModule
    * The default exectute() method calls: GameModule.getGameModule().getGameState().getAllPieces()
    * to set the pieces list, this method provides an alternative way to specify which pieces should be refreshed.
+   * @param pieces - list of pieces to be refreshed, if null defaults to all pieces
    * @param useName - tell the gpIdChecker to use the piece name
    * @param pieces - list of pieces to be refreshed, if null defaults to all pieces
    * @throws IllegalBuildException - if we get a gpIdChecker error
    */
-  public void executeHeadless(boolean useName, ArrayList<GamePiece> pieces) throws IllegalBuildException {
+  public void executeHeadless(boolean useName,  boolean useLabelerName, ArrayList<GamePiece> pieces) throws IllegalBuildException {
     final GameModule theModule = GameModule.getGameModule();
     updatedCount = 0;
     notFoundCount = 0;
@@ -242,7 +248,7 @@ public final class GameRefresher implements GameComponent {
      * 1. Use the GpIdChecker to build a cross-reference of all available
      * PieceSlots and PlaceMarker's in the module.
      */
-    gpIdChecker = new GpIdChecker(useName);
+    gpIdChecker = new GpIdChecker(useName, useLabelerName);
     for (PieceSlot slot : theModule.getAllDescendantComponentsOf(PieceSlot.class)) {
       gpIdChecker.add(slot);
     }
@@ -327,7 +333,7 @@ public final class GameRefresher implements GameComponent {
     gpIdChecker = null;
   }
 
-  public void execute(boolean testMode, boolean useName) {
+  public void execute(boolean testMode, boolean useName, boolean useLabelerName) {
     this.testMode = testMode;
     this.useLabelerName = useLabelerName;
 
@@ -339,7 +345,7 @@ public final class GameRefresher implements GameComponent {
      * 1. Use the GpIdChecker to build a cross-reference of all available
      * PieceSlots and PlaceMarker's in the module.
      */
-    gpIdChecker = new GpIdChecker(useName,useLabelerName);
+    gpIdChecker = new GpIdChecker(useName, useLabelerName);
     for (PieceSlot slot : theModule.getAllDescendantComponentsOf(PieceSlot.class)) {
       gpIdChecker.add(slot);
     }

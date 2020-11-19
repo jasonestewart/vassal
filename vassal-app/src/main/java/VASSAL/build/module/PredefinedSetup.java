@@ -268,7 +268,7 @@ public class PredefinedSetup extends AbstractConfigurable implements GameCompone
     gs.loadGameInForeground(fileName, getSavedGameContents());
 
     // call the gameRefresher
-    gameRefresher.executeHeadless(true, null);
+    gameRefresher.executeHeadless(true, true,   null);
 
     // save the refreshed game into a temporary file
     File tmp = File.createTempFile("vassal", null);
